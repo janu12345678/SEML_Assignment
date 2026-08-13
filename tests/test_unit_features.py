@@ -7,7 +7,6 @@ the fastest layer of the pyramid and are what makes refactoring safe.
 from __future__ import annotations
 
 import numpy as np
-import pandas as pd
 import pytest
 
 from loan_risk.config import settings

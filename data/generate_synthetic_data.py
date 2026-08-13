@@ -70,15 +70,25 @@ def generate(n_rows: int = 20_000, seed: int = RNG_SEED) -> pd.DataFrame:
     bankruptcy = (rng.uniform(0, 1, n_rows) < 0.06).astype(int)
     prev_defaults = (rng.uniform(0, 1, n_rows) < 0.14).astype(int)
     payment_history = rng.integers(0, 49, n_rows)          # months of clean history
-    credit_history_len = np.clip((age - 18) * rng.uniform(0.3, 1.0, n_rows), 0, None).astype(int)
+    credit_history_len = np.clip(
+        (age - 18) * rng.uniform(0.3, 1.0, n_rows), 0, None
+    ).astype(int)
     utility_history = np.clip(rng.beta(6, 2, n_rows), 0, 1).round(3)
     job_tenure = np.clip(rng.integers(0, 25, n_rows), 0, experience)
 
     # ── Assets / liabilities ────────────────────────────────────────
-    savings = np.clip((annual_income * rng.uniform(0.0, 0.9, n_rows)).astype(int), 0, None)
-    checking = np.clip((annual_income * rng.uniform(0.0, 0.3, n_rows)).astype(int), 0, None)
+    savings = np.clip(
+        (annual_income * rng.uniform(0.0, 0.9, n_rows)).astype(int),
+        0, None,
+    )
+    checking = np.clip(
+        (annual_income * rng.uniform(0.0, 0.3, n_rows)).astype(int),
+        0, None,
+    )
     total_assets = np.clip(
-        (savings + checking + annual_income * rng.uniform(0.5, 5.0, n_rows)).astype(int), 0, None
+        (savings + checking
+         + annual_income * rng.uniform(0.5, 5.0, n_rows)).astype(int),
+        0, None,
     )
     total_liabilities = np.clip(
         (loan_amount * rng.uniform(0.3, 2.0, n_rows)).astype(int), 0, None
@@ -94,7 +104,10 @@ def generate(n_rows: int = 20_000, seed: int = RNG_SEED) -> pd.DataFrame:
         loan_amount * r_month * (1 + r_month) ** loan_duration
         / ((1 + r_month) ** loan_duration - 1)
     ).round(2)
-    total_dti = ((monthly_debt + monthly_loan_payment) * 12 / (annual_income + 1)).clip(0, 5).round(3)
+    total_dti = (
+        (monthly_debt + monthly_loan_payment) * 12
+        / (annual_income + 1)
+    ).clip(0, 5).round(3)
 
     # ── Latent creditworthiness -> LoanApproved (learnable signal) ──
     # A mix of linear terms AND non-linear interactions / thresholds. The
@@ -104,10 +117,14 @@ def generate(n_rows: int = 20_000, seed: int = RNG_SEED) -> pd.DataFrame:
     loan_to_income = loan_amount / (annual_income + 1)
 
     # Non-linear / interaction structure (trees excel here, linear models don't)
-    sweet_spot = ((credit_score >= 660) & (dti < 0.35)).astype(float)      # AND interaction
-    either_bad = ((credit_score < 580) | (cc_util > 0.70)).astype(float)   # OR (non-linear)
-    double_hit = (prev_defaults * bankruptcy).astype(float)                # compounding risk
-    over_leveraged = (loan_to_income > 2.5).astype(float)                  # step threshold
+    sweet_spot = (
+        (credit_score >= 660) & (dti < 0.35)
+    ).astype(float)
+    either_bad = (
+        (credit_score < 580) | (cc_util > 0.70)
+    ).astype(float)
+    double_hit = (prev_defaults * bankruptcy).astype(float)
+    over_leveraged = (loan_to_income > 2.5).astype(float)
 
     z = (
         0.35

@@ -1,8 +1,6 @@
 import os
+
 import pandas as pd
-import numpy as np
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import train_test_split
 
 # Dynamically resolve paths
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -46,9 +44,17 @@ def prepare_data():
     # STEP 4: Encode categorical variables
     # =========================================================
     cat_mappings = {
-        'EmploymentStatus': {'Employed': 0, 'Self-Employed': 1, 'Unemployed': 2},
-        'EducationLevel': {"Associate": 0, "Bachelor": 1, "Doctorate": 2, "High School": 3, "Master": 4},
-        'LoanPurpose': {'Auto': 0, 'Debt Consolidation': 1, 'Education': 2, 'Home': 3, 'Other': 4}
+        'EmploymentStatus': {
+            'Employed': 0, 'Self-Employed': 1, 'Unemployed': 2,
+        },
+        'EducationLevel': {
+            "Associate": 0, "Bachelor": 1, "Doctorate": 2,
+            "High School": 3, "Master": 4,
+        },
+        'LoanPurpose': {
+            'Auto': 0, 'Debt Consolidation': 1,
+            'Education': 2, 'Home': 3, 'Other': 4,
+        },
     }
     for col, mapping in cat_mappings.items():
         if col in df.columns and df[col].dtype == 'object':
